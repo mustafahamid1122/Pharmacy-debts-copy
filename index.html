@@ -4,12 +4,22 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0f766e">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ديون المذاخر">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 <title>ديون المذاخر</title>
 <style>
 :root{--bg:#f3f6f5;--card:#fff;--tx:#14211d;--mu:#6b7a75;--bd:#e3e9e6;--pr:#0f766e;--pr2:#14b8a6;--rd:#c0392b;--rdb:#fdeceb;--am:#b7791f;--amb:#fdf3dc;--gn:#2f855a;--gnb:#e6f4ec;--sh:0 1px 3px rgba(0,0,0,.05),0 8px 20px rgba(0,0,0,.05)}
 @media(prefers-color-scheme:dark){:root{--bg:#0d1211;--card:#171f1d;--tx:#e8eeeb;--mu:#93a39c;--bd:#27322f;--pr:#0d9488;--pr2:#2dd4bf;--rd:#ff8a7a;--rdb:#3a1f1c;--am:#f0c060;--amb:#38300f;--gn:#6fcf97;--gnb:#14301f;--sh:none}}
+:root[data-theme=dark]{--bg:#0d1211;--card:#171f1d;--tx:#e8eeeb;--mu:#93a39c;--bd:#27322f;--pr:#0d9488;--pr2:#2dd4bf;--rd:#ff8a7a;--rdb:#3a1f1c;--am:#f0c060;--amb:#38300f;--gn:#6fcf97;--gnb:#14301f;--sh:none}
+:root[data-theme=light]{--bg:#f3f6f5;--card:#fff;--tx:#14211d;--mu:#6b7a75;--bd:#e3e9e6;--pr:#0f766e;--pr2:#14b8a6;--rd:#c0392b;--rdb:#fdeceb;--am:#b7791f;--amb:#fdf3dc;--gn:#2f855a;--gnb:#e6f4ec;--sh:0 1px 3px rgba(0,0,0,.05),0 8px 20px rgba(0,0,0,.05)}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.5 system-ui,"Segoe UI",Tahoma,Arial,sans-serif;padding-bottom:110px}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.5 Tajawal,system-ui,"Segoe UI",Tahoma,Arial,sans-serif;padding-bottom:110px}
 .w{max-width:820px;margin:0 auto;padding:0 16px}
 .top{background:linear-gradient(135deg,var(--pr),var(--pr2));color:#fff;padding:calc(14px + env(safe-area-inset-top)) 0 20px;border-radius:0 0 26px 26px}
 .row{display:flex;align-items:center;gap:8px}.sp{justify-content:space-between}.wr{flex-wrap:wrap}.grow{flex:1;min-width:0}
@@ -50,9 +60,9 @@ textarea{min-height:130px;margin:8px 0}
 <body>
 <div class="top"><div class="w">
 <div class="row sp"><div><small>إدارة الصيدلية</small><h1>ديون المذاخر</h1></div>
-<div class="row"><button class="ib" id="exp" data-ic="download" title="نسخة احتياطية"></button><button class="ib" id="imp" data-ic="upload" title="استرجاع"></button><button class="ib" id="lo" data-ic="logout" title="خروج"></button></div></div>
+<div class="row"><button class="ib" id="thm" title="الوضع الليلي / النهاري" style="font-size:17px">🌙</button><button class="ib" id="trsh" title="سلة المحذوفات" style="font-size:17px">🗑️</button><button class="ib" id="exp" data-ic="download" title="نسخة احتياطية"></button><button class="ib" id="imp" data-ic="upload" title="استرجاع"></button><button class="ib" id="lo" data-ic="logout" title="خروج"></button></div></div>
 <div class="stats" id="stats"></div></div></div>
-<div class="w"><div class="chips" id="chips"></div><div id="list"></div></div>
+<div class="w"><div id="bkWarn" class="mu" style="display:none;padding-top:12px"></div><div class="chips" id="chips"></div><div id="list"></div></div>
 
 <div class="bar"><button class="nv on" id="nh" data-ic="home"><span>الرئيسية</span></button>
 <button class="fab" id="add" data-ic="plus"></button>
@@ -81,6 +91,9 @@ textarea{min-height:130px;margin:8px 0}
 <input type="file" id="fi" accept="image/*" hidden><input type="file" id="fi2" accept="image/*" hidden><input type="file" id="impf" accept=".json" hidden>
 <datalist id="sl"></datalist>
 
+<dialog id="dlgTrash"><div class="row sp"><b>🗑️ سلة المحذوفات</b><button class="btn g s" data-close>إغلاق</button></div>
+<p class="mu">الفواتير المحذوفة تبقى هنا وتكدر تسترجعها بأي وقت.</p><div id="trashList"></div></dialog>
+
 <div id="auth"><div class="w"><h1 style="margin:30px 0 14px">ديون المذاخر</h1>
 <div class="f"><div class="full"><label>الإيميل</label><input id="em" type="email" autocomplete="username"></div><div class="full"><label>كلمة السر</label><input id="pw" type="password" autocomplete="current-password"></div></div>
 <button class="btn" id="li" style="width:100%;justify-content:center">دخول</button><div id="ae" class="mu" style="margin-top:8px"></div></div></div>
@@ -108,6 +121,8 @@ function render(){
  const open=inv.filter(i=>rem(i)>0),sum=a=>a.reduce((s,i)=>s+rem(i),0);
  const od=open.filter(i=>left(i)<0),wk=open.filter(i=>left(i)>=0&&left(i)<=7);
  $('#stats').innerHTML=`<div class="st"><small>إجمالي الديون</small><b>${fmt(sum(open))}</b></div><div class="st"><small>متأخر</small><b>${fmt(sum(od))}</b></div><div class="st"><small>خلال 7 أيام</small><b>${fmt(sum(wk))}</b></div>`;
+ const td=open.filter(i=>left(i)===0),o30=open.filter(i=>left(i)<-30);
+ $('#stats').insertAdjacentHTML('beforeend',`<div class="st"><small>مستحق اليوم</small><b>${fmt(sum(td))}</b></div><div class="st"><small>متأخر +30 يوم</small><b>${fmt(sum(o30))}</b></div><div class="st"><small>فواتير مفتوحة</small><b>${open.length}</b></div>`);
  const names=[...new Set(inv.map(i=>i.supplier))].sort((a,b)=>a.localeCompare(b,'ar'));
  if(sel&&!names.includes(sel))sel=null;
  $('#sl').innerHTML=names.map(n=>`<option value="${esc(n)}">`).join('');
@@ -145,7 +160,7 @@ async function load(){
  inv=a.data.map(fromRow);sups={};(b.data||[]).forEach(r=>sups[r.name]={rep:r.rep_name,phone:r.phone});render();
 }
 const store={save:async(i,q)=>{const{error}=await SB.from('pharm_invoices').upsert(toRow(i));if(error)alert('ما انحفظت: '+error.message);if(!q)await load()},
- del:async i=>{if(i.imagePath)await SB.storage.from('invoice-images').remove([i.imagePath]);const{error}=await SB.from('pharm_invoices').delete().eq('id',i.id);if(error)alert(error.message);await load()}};
+ del:async i=>{const saved=await trashIt('invoice',toRow(i));if(!saved&&!confirm('سلة المحذوفات غير مفعّلة بعد (طبّق supabase-upgrade.sql). حذف نهائي؟'))return;if(saved)logAct('delete','invoice',i.id,{supplier:i.supplier,amount:i.amount});if(i.imagePath)await SB.storage.from('invoice-images').remove([i.imagePath]);const{error}=await SB.from('pharm_invoices').delete().eq('id',i.id);if(error)alert(error.message);await load()}};
 function shrink(file){return new Promise(res=>{const im=new Image();im.onload=()=>{const k=Math.min(1,1600/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);c.toBlob(b=>res(b||file),'image/jpeg',.85)};im.onerror=()=>res(file);im.src=URL.createObjectURL(file)})}
 async function upImg(file,id){const b=await shrink(file),p=uid+'/'+id+'.jpg';const{error}=await SB.storage.from('invoice-images').upload(p,b,{contentType:'image/jpeg',upsert:true});if(error){alert('الصورة ما انرفعت: '+error.message);return''}return p}
 
@@ -169,8 +184,8 @@ document.addEventListener('click',async e=>{
  if(D.rep){const s=sups[sel]||{};$('#rn').value=s.rep||'';$('#rp').value=s.phone||'';return $('#dlgRep').showModal()}
  if(D.img){pendImg=D.img;return $('#fi2').click()}
  if(D.view){const i=f(D.view),{data,error}=await SB.storage.from('invoice-images').createSignedUrl(i.imagePath,600);if(error)return alert(error.message);$('#pic').src=data.signedUrl;return $('#dlgImg').showModal()}
- if(D.p){const i=f(D.p);await store.save({...i,paidAmount:Number(i.amount),pays:[...(i.pays||[]),{d:iso(new Date()),a:rem(i)}]})}
- if(D.u){const i=f(D.u);await store.save({...i,paidAmount:0,pays:[]})}
+ if(D.p){const i=f(D.p);await store.save({...i,paidAmount:Number(i.amount),pays:[...(i.pays||[]),{d:iso(new Date()),a:rem(i)}]});logAct('pay_full','invoice',i.id,{supplier:i.supplier,amount:rem(i)})}
+ if(D.u){const i=f(D.u);await store.save({...i,paidAmount:0,pays:[]});logAct('pay_undo','invoice',i.id,{supplier:i.supplier})}
  if(D.d&&confirm('تحذف هذي الفاتورة؟'))await store.del(f(D.d));
 });
 $('#nh').onclick=()=>{sel=null;render();scrollTo(0,0)};
@@ -184,7 +199,7 @@ async function payAmount(){
  if(a>debt){alert('المبلغ أكبر من الدين، انحسب '+fmt(debt)+' فقط');a=debt}
  let r=a;const plan=[];for(const i of o){if(r<=0)break;const p=Math.min(r,rem(i));plan.push([i,p]);r-=p}
  if(!confirm('يتوزع من الأقدم للأحدث:\n'+plan.map(([i,p])=>'فاتورة '+(i.invoiceNo||'—')+' ('+i.date+'): '+fmt(p)).join('\n')))return;
- const d=iso(new Date());for(const[i,p]of plan)await store.save({...i,paidAmount:Number(i.paidAmount||0)+p,pays:[...(i.pays||[]),{d,a:p}]},true);await load();
+ const d=iso(new Date());for(const[i,p]of plan)await store.save({...i,paidAmount:Number(i.paidAmount||0)+p,pays:[...(i.pays||[]),{d,a:p}]},true);logAct('pay_amount','supplier',sel,{amount:a});await load();
 }
 
 /* مندوب + رسالة */
@@ -247,9 +262,61 @@ $('#oldsave').onclick=async()=>{
 };
 
 /* نسخة احتياطية */
-$('#exp').onclick=()=>{const u=URL.createObjectURL(new Blob([JSON.stringify(inv)],{type:'application/json'})),a=document.createElement('a');a.href=u;a.download='pharmacy-debts-'+iso(new Date())+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)};
+$('#exp').onclick=()=>{try{localStorage.setItem('lastBackup',iso(new Date()));checkBackup()}catch(e){}const u=URL.createObjectURL(new Blob([JSON.stringify(inv)],{type:'application/json'})),a=document.createElement('a');a.href=u;a.download='pharmacy-debts-'+iso(new Date())+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)};
 $('#imp').onclick=()=>$('#impf').click();
 $('#impf').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;try{const a=JSON.parse(await f.text());if(!Array.isArray(a))throw 0;if(!confirm('يضيف/يحدّث '+a.length+' فاتورة. تكمل؟'))return;for(const i of a)if(i&&i.id&&i.supplier)await store.save(i,true);await load()}catch(x){alert('الملف غير صالح')}};
+/* ---------- Upgrade: theme / auto-lock / audit / trash / backup reminder ---------- */
+try { const th = localStorage.getItem('theme'); if (th) document.documentElement.dataset.theme = th; } catch (e) {}
+$('#thm').onclick = () => {
+  const dark = document.documentElement.dataset.theme === 'dark' || (!document.documentElement.dataset.theme && matchMedia('(prefers-color-scheme: dark)').matches);
+  document.documentElement.dataset.theme = dark ? 'light' : 'dark';
+  try { localStorage.setItem('theme', document.documentElement.dataset.theme); } catch (e) {}
+};
+let lastAct = Date.now();
+['click', 'keydown', 'touchstart', 'input'].forEach(ev => addEventListener(ev, () => { lastAct = Date.now(); }, { passive: true }));
+setInterval(() => { if (uid && Date.now() - lastAct > 10 * 60 * 1000) { SB.auth.signOut(); alert('تم تسجيل الخروج تلقائياً بعد 10 دقائق بدون استخدام، لحماية المعلومات.'); } }, 30000);
+async function logAct(action, entity, entityId, details) {
+  try { await SB.from('audit_log').insert({ user_id: uid, action, entity, entity_id: entityId ? String(entityId) : null, details: details || null }); } catch (e) {}
+}
+async function trashIt(entity, payload) {
+  try { const { error } = await SB.from('trash_items').insert({ user_id: uid, entity, payload }); return !error; } catch (e) { return false; }
+}
+function checkBackup() {
+  let lb = null; try { lb = localStorage.getItem('lastBackup'); } catch (e) {}
+  const el = $('#bkWarn'); if (!el) return;
+  const old = !lb || (new Date(iso(new Date())) - new Date(lb)) / 864e5 >= 7;
+  el.style.display = old ? 'block' : 'none';
+  if (old) el.textContent = lb ? `⚠️ آخر نسخة احتياطية منزّلة: ${lb}. نزّل نسخة جديدة من زر التنزيل بالأعلى.` : '⚠️ ما منزّل نسخة احتياطية من هذا الجهاز بعد. نزّل نسخة من زر التنزيل بالأعلى واحتفظ بها بمكان آمن.';
+}
+$('#trsh').onclick = async () => {
+  const L = $('#trashList');
+  L.innerHTML = '<div class="empty">جاري التحميل...</div>';
+  $('#dlgTrash').showModal();
+  const { data, error } = await SB.from('trash_items').select('*').order('created_at', { ascending: false }).limit(200);
+  if (error) { L.innerHTML = '<div class="empty">السلة غير مفعّلة بعد.<br>طبّق ملف supabase-upgrade.sql في Supabase (SQL Editor) حتى تشتغل السلة وسجل التدقيق.</div>'; return; }
+  if (!data || !data.length) { L.innerHTML = '<div class="empty">السلة فارغة</div>'; return; }
+  L.innerHTML = data.map(it => { const p = it.payload || {}; return `<div class="sc"><div class="row sp"><b>${esc(p.supplier || '—')}</b><span class="mu">${esc(String(it.created_at || '').slice(0, 16).replace('T', ' '))}</span></div>
+  <div class="mu">فاتورة ${esc(p.invoice_no || '—')} • ${esc(p.date || '')} • المبلغ ${fmt(p.amount)}</div>
+  <div class="row" style="margin-top:8px"><button class="btn s" data-rs="${it.id}">♻️ استرجاع</button><button class="btn g s" data-pg="${it.id}" style="margin-inline-start:auto">حذف نهائي</button></div></div>`; }).join('');
+  L.querySelectorAll('[data-rs]').forEach(b => b.onclick = async () => {
+    const it = data.find(x => x.id === b.dataset.rs); if (!it) return;
+    if (!confirm('استرجاع هذي الفاتورة؟')) return;
+    const { error } = await SB.from('pharm_invoices').upsert(it.payload);
+    if (error) return alert('تعذر الاسترجاع: ' + error.message);
+    await SB.from('trash_items').delete().eq('id', it.id);
+    logAct('restore', 'invoice', it.payload.id, { supplier: it.payload.supplier });
+    $('#dlgTrash').close(); await load();
+  });
+  L.querySelectorAll('[data-pg]').forEach(b => b.onclick = async () => {
+    if (!confirm('حذف نهائي؟ ما راح تكدر تسترجعها بعدها.')) return;
+    await SB.from('trash_items').delete().eq('id', b.dataset.pg);
+    logAct('purge', 'trash', b.dataset.pg, null);
+    $('#dlgTrash').close();
+  });
+};
+const _load0 = load;
+load = async () => { await _load0(); checkBackup(); };
+
 init();
 </script>
 </body>
